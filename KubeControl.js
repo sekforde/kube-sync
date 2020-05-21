@@ -26,9 +26,13 @@ exports.KubeControl = class {
 			const filename = tmp.tmpNameSync({ tmpdir: `${folder}`, postfix: '.yaml' });
 
 			console.log('writing to ', filename);
-			console.log(yaml);
 
 			await fse.writeFile(filename, yaml, { encoding: 'utf8' });
+
+			if (process.env.NO_EXEC) {
+				console.log('No Execution Required')
+				return;
+			}
 
 			await execute(filename).catch(console.error);
 
