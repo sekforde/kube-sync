@@ -1,0 +1,31 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: workforce-worker-echo
+  labels:
+    app: workforce-worker-echo
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: workforce-worker-echo
+  template:
+    metadata:
+      labels:
+        app: workforce-worker-echo
+    spec:
+      serviceAccountName: internal-kubectl
+      containers:
+        - name: workforce-worker-echo
+          image: oneflow/workforce-worker-echo
+          env:
+            - name: WORKER_ACCESSKEYID
+              value: "[access_id]"
+            - name: WORKER_SECRETACCESSKEY
+              value: "[secret here]"
+            - name: WORKER_QUEUEURL
+              value: "[workqueue url here]"
+            - name: TEST
+              value: "1"
+      imagePullSecrets:
+        - name: regcred

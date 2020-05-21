@@ -22,10 +22,9 @@ exports.StateSyncer = class {
 	}
 	async process() {
 		console.log('processing new config:', this.state.hash);
+		// kubectl apply -f my.yaml
 		await KubeControl.apply(this.state.yaml);
-		setTimeout(() => {
-			this.finished();
-		}, 10000);
+		this.finished();
 	}
 	finished() {
 		console.log('finished processing:', this.state.hash);

@@ -1,13 +1,39 @@
-const { exec } = require('child_process');
+const { spawn } = require('child_process');
 const fse = require('fs-extra');
-const tmp = require('tmp-promise');
+const tmp = require('tmp');
+
+const folder = process.env.YAML_FOLDER || '/tmp';
+
+const execute = (filename) => {
+	return new Promise((resolve, reject) => {
+		const kubectl = spawn('kubectl', ['apply', '-f', filename]);
+		kubectl.stdout.on('data', (data) => {
+			console.log(`stdout: ${data}`);
+		});
+		kubectl.stderr.on('data', (data) => {
+			console.error(`stderr: ${data}`);
+		});
+		kubectl.on('close', (code) => {
+			console.log(`child process exited with code ${code}`);
+			resolve();
+		});
+	});
+}
 
 exports.KubeControl = class {
 	static async apply(yaml) {
-		const o = await tmp.file();
-		console.log('writing to ', o.path);
-		await fse.writeFileSync(o.path, yaml);
-		const cmd = `kubectl -f apply ${o.path}`;
-		console.log(cmd);
+		try {
+			const filename = tmp.tmpNameSync({ tmpdir: `${folder}`, postfix: '.yaml' });
+
+			console.log('writing to ', filename);
+			console.log(yaml);
+
+			await fse.writeFile(filename, yaml, { encoding: 'utf8' });
+
+			await execute(filename).catch(console.error);
+
+		} catch (err) {
+			console.error(err);
+		}
 	}
 }

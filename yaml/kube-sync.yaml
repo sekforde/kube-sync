@@ -1,0 +1,9 @@
+apiVersion: v1
+kind: Pod
+metadata:
+  name: kube-sync
+spec:
+  serviceAccountName: internal-kubectl
+  containers:
+    - name: kube-sync
+      image: sekforde/kube-sync
